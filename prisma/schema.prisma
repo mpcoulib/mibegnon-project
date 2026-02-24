@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum EducationLevel {
+  TROISIEME
+  SECONDE
+  PREMIERE
+  TERMINALE
+  BAC_PLUS_1
+  BAC_PLUS_2
+}
+
+enum ApplicationStatus {
+  INTERESSE
+  EN_PREPARATION
+  POSTULE
+  EN_ATTENTE
+  ACCEPTE
+  REFUSE
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id              String          @id // matches Supabase Auth UUID
+  email           String          @unique
+  fullName        String
+  phone           String?
+  city            String?
+  educationLevel  EducationLevel?
+  fieldOfStudy    String?
+  gpa             Float?
+  targetCountries String[]
+  targetFields    String[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  bookmarks    Bookmark[]
+  applications Application[]
+
+  @@map("users")
+}
+
+model Scholarship {
+  id             String    @id @default(cuid())
+  name           String
+  provider       String
+  country        String
+  amount         Float?
+  currency       String    @default("USD")
+  isFullFunding  Boolean   @default(false)
+  deadline       DateTime?
+  academicLevels String[]  // e.g. ["BACHELOR", "MASTER"]
+  fields         String[]  // e.g. ["Informatique", "Médecine"]
+  description    String    @db.Text
+  requirements   String?   @db.Text
+  link           String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  bookmarks    Bookmark[]
+  applications Application[]
+
+  @@map("scholarships")
+}
+
+model University {
+  id              String   @id @default(cuid())
+  name            String
+  country         String
+  city            String
+  website         String
+  ranking         Int?
+  tuitionFee      Float?
+  tuitionCurrency String   @default("USD")
+  hasScholarships Boolean  @default(false)
+  fields          String[]
+  description     String?  @db.Text
+  logoUrl         String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookmarks    Bookmark[]
+  applications Application[]
+
+  @@map("universities")
+}
+
+model Bookmark {
+  id            String       @id @default(cuid())
+  userId        String
+  scholarshipId String?
+  universityId  String?
+  createdAt     DateTime     @default(now())
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship Scholarship?  @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  university  University?   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scholarshipId])
+  @@unique([userId, universityId])
+  @@map("bookmarks")
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  userId        String
+  scholarshipId String?
+  universityId  String?
+  status        ApplicationStatus @default(INTERESSE)
+  notes         String?           @db.Text
+  deadline      DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship Scholarship? @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  university  University?  @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  documents   Document[]
+
+  @@map("applications")
+}
+
+model Document {
+  id            String      @id @default(cuid())
+  applicationId String
+  name          String
+  isCompleted   Boolean     @default(false)
+  dueDate       DateTime?
+  createdAt     DateTime    @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
