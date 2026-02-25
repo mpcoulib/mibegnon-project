@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Footer note */}
       <footer className="py-4 text-center text-xs text-slate-400">
-        © {new Date().getFullYear()} Mibegnon — Gratuit pour tous les élèves ivoiriens
+        © {new Date().getFullYear()} Mibegnon · Gratuit pour tous les élèves ivoiriens
       </footer>
     </div>
   );

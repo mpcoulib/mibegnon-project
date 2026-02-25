@@ -74,7 +74,7 @@ export default function HomePage() {
               <span className="text-[var(--gold)]">commence ici.</span>
             </h1>
             <p className="mt-5 text-lg text-white/80 max-w-md">
-              Des centaines de bourses et d&apos;universités du monde entier —
+              Des centaines de bourses et d&apos;universités du monde entier,
               accessibles gratuitement à chaque élève de Côte d&apos;Ivoire.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -275,7 +275,7 @@ export default function HomePage() {
             d&apos;études grâce à Mibegnon.
           </p>
           <p className="mt-2 text-sm font-medium text-[var(--primary)]/70 italic">
-            Ça va aller — on est ensemble. 🇨🇮
+            Ça va aller, on est ensemble. 🇨🇮
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button

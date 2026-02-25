@@ -64,17 +64,20 @@ export function ScholarshipCard({
           </li>
         </ul>
 
-        <Button
-          asChild
-          size="sm"
-          className={`mt-5 w-full ${
-            featured
-              ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
-              : "bg-transparent border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10"
-          }`}
-        >
-          <Link href={`/bourses/${s.id}`}>Voir les détails</Link>
-        </Button>
+        <div className="mt-5 flex items-center gap-2">
+          <Button
+            asChild
+            size="sm"
+            className={`flex-1 ${
+              featured
+                ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                : "bg-transparent border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10"
+            }`}
+          >
+            <Link href={`/bourses/${s.id}`}>Voir les détails</Link>
+          </Button>
+          <SaveButton scholarshipId={s.id} isSaved={isSaved} />
+        </div>
       </CardContent>
     </Card>
   );

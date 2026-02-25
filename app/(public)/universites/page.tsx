@@ -21,7 +21,7 @@ export default async function UniversitesPage({
           </p>
           <h1 className="text-4xl font-bold">Universités mondiales</h1>
           <p className="mt-2 text-white/70">
-            {universities.length} universités référencées — Europe, Amérique, Asie, Afrique
+            {universities.length} universités référencées : Europe, Amérique, Asie, Afrique
           </p>
         </div>
       </section>

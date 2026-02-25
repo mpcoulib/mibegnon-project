@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { ScholarshipCard } from "@/components/scholarship-card";
 import { BoursesFilters } from "@/components/bourses-filters";
 import { scholarships, filterScholarships } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 export default async function BoursesPage({
   searchParams,
@@ -10,6 +12,17 @@ export default async function BoursesPage({
 }) {
   const params = await searchParams;
   const results = filterScholarships(scholarships, params);
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  let savedIds: string[] = [];
+  if (user) {
+    const saved = await prisma.savedScholarship.findMany({
+      where: { userId: user.id },
+      select: { scholarshipId: true },
+    });
+    savedIds = saved.map((s) => s.scholarshipId);
+  }
 
   return (
     <div className="flex flex-col">
@@ -21,7 +34,7 @@ export default async function BoursesPage({
           </p>
           <h1 className="text-4xl font-bold">Toutes les bourses</h1>
           <p className="mt-2 text-white/70">
-            {scholarships.length} bourses disponibles — filtrées pour les élèves ivoiriens
+            {scholarships.length} bourses disponibles, filtrées pour les élèves ivoiriens
           </p>
         </div>
       </section>
@@ -43,7 +56,7 @@ export default async function BoursesPage({
         {results.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((s) => (
-              <ScholarshipCard key={s.id} scholarship={s} />
+              <ScholarshipCard key={s.id} scholarship={s} isSaved={savedIds.includes(s.id)} />
             ))}
           </div>
         ) : (

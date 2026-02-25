@@ -9,7 +9,7 @@ export default function NotFound() {
         Ijioh ! Cette page a fraya en brousse conhan hein
       </h1>
       <p className="mt-3 text-slate-500 max-w-sm">
-        On dirait que cette page n&apos;existe pas — ou elle a pris la clé des champs. Ça va aller tchai !
+        On dirait que cette page n&apos;existe pas, ou elle a pris la clé des champs. Ça va aller tchai !
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Button asChild className="bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 rounded-full px-8">

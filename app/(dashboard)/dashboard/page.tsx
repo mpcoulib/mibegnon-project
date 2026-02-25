@@ -37,7 +37,7 @@ export default async function DashboardPage() {
           Akwaba, {firstName} ! 👋
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          On est ensemble — voici ton espace Mibegnon.
+          On est ensemble, voici ton espace Mibegnon.
         </p>
       </div>
 

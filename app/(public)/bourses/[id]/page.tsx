@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, GraduationCap, CalendarDays, Banknote, ExternalLink, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/save-button";
 import { scholarships } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 const typeLabel: Record<string, string> = {
   complete: "Bourse complète",
@@ -22,6 +25,16 @@ export default async function BourseDetailPage({
   if (!scholarship) notFound();
   const s = scholarship;
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  let isSaved = false;
+  if (user) {
+    const saved = await prisma.savedScholarship.findUnique({
+      where: { userId_scholarshipId: { userId: user.id, scholarshipId: id } },
+    });
+    isSaved = !!saved;
+  }
+
   return (
     <div className="flex flex-col">
       {/* Nav breadcrumb */}
@@ -38,7 +51,7 @@ export default async function BourseDetailPage({
             <Badge className="bg-white/20 text-white border-0">{typeLabel[s.type]}</Badge>
             {s.urgent && (
               <Badge className="bg-[var(--orange)] text-white border-0">
-                Date limite proche
+                toi tu connais oub!
               </Badge>
             )}
           </div>
@@ -170,15 +183,12 @@ export default async function BourseDetailPage({
                 </a>
               </Button>
 
-              <Button
-                asChild
-                variant="outline"
-                className="mt-3 w-full border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10"
-              >
-                <Link href="/connexion">
-                  Sauvegarder (connexion requise)
-                </Link>
-              </Button>
+              <div className="mt-3 flex items-center gap-2">
+                <SaveButton scholarshipId={s.id} isSaved={isSaved} />
+                <span className="text-xs text-slate-400">
+                  {isSaved ? "Sauvegardé dans tes favoris" : "Sauvegarder dans tes favoris"}
+                </span>
+              </div>
 
               <p className="mt-4 text-center text-xs text-slate-400">
                 Mibegnon ne gère pas les candidatures directement.

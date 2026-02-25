@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Image from "next/image";
 import { Mail, MessageSquare, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -59,7 +61,7 @@ export default function ContactPage() {
               </div>
               <h3 className="font-bold text-[var(--primary)] mb-1">Temps de réponse</h3>
               <p className="text-sm text-slate-500">
-                On répond généralement sous <strong>48 h</strong>. Ça va aller — on est là !
+                On répond généralement sous <strong>48 h</strong>. Ça va aller, on est là !
               </p>
             </CardContent>
           </Card>
@@ -74,6 +76,38 @@ export default function ContactPage() {
             </a>{" "}
             et on l&apos;étudiera avec plaisir.
           </p>
+        </div>
+
+        {/* Founder */}
+        <div className="mx-auto max-w-xl mt-8">
+          <Card className="border-slate-200">
+            <CardContent className="pt-6 pb-7">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-4">Fondateur</p>
+              <div className="flex items-center gap-4">
+                <div className="relative h-14 w-14 rounded-full overflow-hidden shrink-0">
+                  <Image
+                    src="/massa.jpg"
+                    alt="Massa Coulibaly"
+                    fill
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div>
+                  <p className="font-bold text-[var(--primary)]">Massa Coulibaly</p>
+                  <p className="text-sm text-slate-500 mb-1">Fondateur de Mibegnon · UC Berkeley</p>
+                  <Link
+                    href="https://www.linkedin.com/in/massa-coulibaly-a25a53135"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)] hover:underline"
+                  >
+                    <span className="inline-flex items-center justify-center h-4 w-4 rounded-sm bg-[#0077B5] text-white text-[9px] font-bold">in</span>
+                    LinkedIn
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>
