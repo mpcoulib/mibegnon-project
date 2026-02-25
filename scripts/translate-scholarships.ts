@@ -117,7 +117,7 @@ async function main() {
 
   try {
     const scholarships = await prisma.scholarship.findMany({
-      where: FORCE ? undefined : { isTranslated: false },
+      where: FORCE ? { ivoirianEligible: true } : { isTranslated: false, ivoirianEligible: true },
       select: { id: true, name: true, description: true, requirements: true, country: true, fields: true },
       take: LIMIT ?? undefined,
       orderBy: { createdAt: "asc" },
