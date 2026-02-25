@@ -199,20 +199,32 @@ export default async function BourseDetailPage({
                 </div>
               </div>
 
-              <Button
-                asChild
-                className="w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
-              >
-                <a
-                  href={s.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2"
-                >
-                  Postuler maintenant
-                  <ExternalLink size={14} />
-                </a>
-              </Button>
+              {s.link ? (
+                <>
+                  <Button
+                    asChild
+                    className="w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                  >
+                    <a
+                      href={s.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2"
+                    >
+                      Postuler maintenant
+                      <ExternalLink size={14} />
+                    </a>
+                  </Button>
+                  <p className="mt-4 text-center text-xs text-slate-400">
+                    Mibegnon ne gère pas les candidatures directement.
+                    Tu seras redirigé vers le site officiel.
+                  </p>
+                </>
+              ) : (
+                <p className="text-center text-sm text-slate-500 py-2">
+                  Yapa un lien direct actu mais on va gerer ça dès que possible 🙏
+                </p>
+              )}
 
               <div className="mt-3 flex items-center gap-2">
                 <SaveButton scholarshipId={s.id} isSaved={isSaved} />
@@ -220,11 +232,6 @@ export default async function BourseDetailPage({
                   {isSaved ? "Sauvegardé dans tes favoris" : "Sauvegarder dans tes favoris"}
                 </span>
               </div>
-
-              <p className="mt-4 text-center text-xs text-slate-400">
-                Mibegnon ne gère pas les candidatures directement.
-                Tu seras redirigé vers le site officiel.
-              </p>
             </div>
           </div>
         </div>
