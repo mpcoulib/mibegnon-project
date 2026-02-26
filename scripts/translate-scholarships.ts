@@ -192,7 +192,9 @@ async function main() {
   if (FORCE) console.log("FORCE — re-translating already translated scholarships.\n");
 
   const client = new Anthropic();
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    datasourceUrl: process.env.DATABASE_URL,
+  });
 
   try {
     const scholarships = await prisma.scholarship.findMany({

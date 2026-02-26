@@ -143,7 +143,9 @@ async function main() {
   console.log("=== Mibegnon Link Fixer ===");
   if (DRY_RUN) console.log("DRY RUN — nothing will be written.\n");
 
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    datasourceUrl: process.env.DATABASE_URL,
+  });
 
   try {
     const scholarships = await prisma.scholarship.findMany({
