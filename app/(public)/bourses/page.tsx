@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export default async function BoursesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; niveau?: string; q?: string }>;
+  searchParams: Promise<{ type?: string; niveau?: string; q?: string; category?: string }>;
 }) {
   const params = await searchParams;
 
@@ -21,6 +21,7 @@ export default async function BoursesPage({
     ...(params.niveau
       ? { academicLevels: { has: params.niveau } }
       : {}),
+    ...(params.category ? { category: params.category } : {}),
     ...(params.q
       ? {
           OR: [

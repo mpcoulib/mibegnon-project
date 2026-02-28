@@ -24,6 +24,7 @@ export function BoursesFilters() {
   const currentType = searchParams.get("type") || "";
   const currentNiveau = searchParams.get("niveau") || "";
   const currentQ = searchParams.get("q") || "";
+  const currentCategory = searchParams.get("category") || "";
 
   function update(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -90,6 +91,44 @@ export function BoursesFilters() {
               {l.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Programme filter */}
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Programme
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => update("category", "")}
+            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+              currentCategory === ""
+                ? "bg-[var(--primary)] text-white"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-[var(--primary)] hover:text-[var(--primary)]"
+            }`}
+          >
+            Tous
+          </button>
+          <button
+            onClick={() => update("category", "mastercard")}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+              currentCategory === "mastercard"
+                ? "text-white shadow-sm"
+                : "border border-slate-200 bg-white text-slate-600 hover:shadow-sm"
+            }`}
+            style={
+              currentCategory === "mastercard"
+                ? { background: "linear-gradient(135deg, #eb001b 0%, #f79e1b 100%)" }
+                : undefined
+            }
+          >
+            <span className="flex items-center">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#eb001b]" />
+              <span className="-ml-1 inline-block h-2.5 w-2.5 rounded-full bg-[#f79e1b]" />
+            </span>
+            Mastercard Foundation
+          </button>
         </div>
       </div>
 

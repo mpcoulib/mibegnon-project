@@ -71,7 +71,22 @@ export function ScholarshipCard({
     >
       <span className="absolute top-3 right-3 text-2xl">{flag}</span>
 
-      <CardContent className="pt-5 pb-6 pr-12">
+      {s.category === "mastercard" && (
+        <Link
+          href="/bourses?category=mastercard"
+          className="absolute top-3 left-3 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white shadow-sm"
+          style={{ background: "linear-gradient(135deg, #eb001b 0%, #f79e1b 100%)" }}
+          title="Les bourses Mastercard"
+        >
+          <span className="flex items-center gap-0.5">
+            <span className="inline-block h-3 w-3 rounded-full bg-[#eb001b] opacity-90" />
+            <span className="-ml-1.5 inline-block h-3 w-3 rounded-full bg-[#f79e1b] opacity-90" />
+          </span>
+          Mastercard Foundation
+        </Link>
+      )}
+
+      <CardContent className={`pt-5 pb-6 pr-12 ${s.category === "mastercard" ? "mt-6" : ""}`}>
         <div className="flex flex-wrap gap-2 mb-3">
           <Badge
             variant="outline"
