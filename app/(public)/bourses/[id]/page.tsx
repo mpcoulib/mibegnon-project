@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, GraduationCap, CalendarDays, Banknote, ExternalLink,
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from "@/components/save-button";
+import { ApplyButton } from "@/components/apply-button";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
@@ -60,11 +61,16 @@ export default async function BourseDetailPage({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   let isSaved = false;
+  let hasApplication = false;
   if (user) {
     const saved = await prisma.savedScholarship.findUnique({
       where: { userId_scholarshipId: { userId: user.id, scholarshipId: id } },
     });
     isSaved = !!saved;
+    const application = await prisma.application.findFirst({
+      where: { userId: user.id, scholarshipId: id },
+    });
+    hasApplication = !!application;
   }
 
   const flag = getFlag(s.country);
@@ -199,11 +205,32 @@ export default async function BourseDetailPage({
                 </div>
               </div>
 
+              {user ? (
+                hasApplication ? (
+                  <Button
+                    asChild
+                    className="w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                  >
+                    <Link href="/dashboard/candidatures">Voir ma candidature</Link>
+                  </Button>
+                ) : (
+                  <ApplyButton scholarshipId={s.id} />
+                )
+              ) : (
+                <Button
+                  asChild
+                  className="w-full bg-[var(--orange)] text-white hover:bg-[var(--orange)]/90"
+                >
+                  <Link href="/connexion">Se connecter pour suivre</Link>
+                </Button>
+              )}
+
               {s.link ? (
                 <>
                   <Button
                     asChild
-                    className="w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                    variant="outline"
+                    className="mt-3 w-full border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10"
                   >
                     <a
                       href={s.link}
@@ -211,17 +238,16 @@ export default async function BourseDetailPage({
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2"
                     >
-                      Postuler maintenant
+                      Site officiel
                       <ExternalLink size={14} />
                     </a>
                   </Button>
                   <p className="mt-4 text-center text-xs text-slate-400">
-                    Mibegnon ne gère pas les candidatures directement.
-                    Tu seras redirigé vers le site officiel.
+                    La candidature officielle se fait sur le site du programme.
                   </p>
                 </>
               ) : (
-                <p className="text-center text-sm text-slate-500 py-2">
+                <p className="mt-3 text-center text-sm text-slate-500 py-2">
                   Yapa un lien direct actu mais on va gerer ça dès que possible 🙏
                 </p>
               )}

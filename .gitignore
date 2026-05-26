@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
 # next.js
 /.next/
@@ -22,6 +25,9 @@
 
 # misc
 .DS_Store
+Assets/
+
+# local asset sources (use public/ for app images)
 *.pem
 
 # debug

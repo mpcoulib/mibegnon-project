@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
+import { ChaoWidget } from "@/components/chao-widget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <ChaoWidget />
       </body>
     </html>
   );

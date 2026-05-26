@@ -3,7 +3,33 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Trophy, BookOpen, DollarSign, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { universities } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
+
+const countryFlags: Record<string, string> = {
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  Allemagne: "🇩🇪",
+  "United Kingdom": "🇬🇧",
+  "Royaume-Uni": "🇬🇧",
+  UK: "🇬🇧",
+  USA: "🇺🇸",
+  "United States": "🇺🇸",
+  Canada: "🇨🇦",
+  Australia: "🇦🇺",
+  Switzerland: "🇨🇭",
+  Suisse: "🇨🇭",
+  "South Africa": "🇿🇦",
+  "Afrique du Sud": "🇿🇦",
+};
+
+function getFlag(country: string): string {
+  return countryFlags[country] ?? "🌍";
+}
+
+function formatTuition(fee: number | null, currency: string): string {
+  if (fee == null) return "Non précisés";
+  return `${fee.toLocaleString("fr-FR")} ${currency}/an`;
+}
 
 export default async function UniversiteDetailPage({
   params,
@@ -11,14 +37,15 @@ export default async function UniversiteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const university = universities.find((u) => u.id === id);
+  const u = await prisma.university.findUnique({ where: { id } });
 
-  if (!university) notFound();
-  const u = university;
+  if (!u) notFound();
+
+  const flag = getFlag(u.country);
+  const tuition = formatTuition(u.tuitionFee, u.tuitionCurrency);
 
   return (
     <div className="flex flex-col">
-      {/* Header */}
       <div className="bg-[var(--primary)] px-6 pt-6 pb-14 text-white">
         <div className="mx-auto max-w-6xl">
           <Link
@@ -37,18 +64,17 @@ export default async function UniversiteDetailPage({
             </div>
           )}
           <h1 className="text-3xl font-bold leading-snug max-w-3xl">
-            {u.flag} {u.name}
+            {flag} {u.name}
           </h1>
-          <p className="mt-2 text-white/70">{u.country}</p>
+          <p className="mt-2 text-white/70">
+            {u.city}, {u.country}
+          </p>
         </div>
       </div>
 
-      {/* Main content */}
       <div className="mx-auto w-full max-w-6xl px-6 -mt-6">
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* ── Left: details ── */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Quick stats */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs text-slate-500 mb-1">Pays</p>
@@ -56,6 +82,10 @@ export default async function UniversiteDetailPage({
                   <MapPin size={13} className="text-[var(--orange)]" />
                   {u.country}
                 </p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Ville</p>
+                <p className="font-semibold text-slate-800">{u.city}</p>
               </div>
               {u.ranking && (
                 <div>
@@ -70,53 +100,37 @@ export default async function UniversiteDetailPage({
                 <p className="text-xs text-slate-500 mb-1">Frais approximatifs</p>
                 <p className="font-semibold text-slate-800 flex items-center gap-1">
                   <DollarSign size={13} className="text-[var(--orange)]" />
-                  {u.tuition.split("·")[0].trim()}
+                  {tuition}
                 </p>
               </div>
             </div>
 
-            {/* Description */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-bold text-[var(--primary)] mb-3">
-                À propos
-              </h2>
-              <p className="text-slate-600 leading-relaxed">{u.description}</p>
-            </div>
-
-            {/* Fields */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
-                <BookOpen size={18} className="text-[var(--orange)]" />
-                Domaines d&apos;enseignement
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {u.fields.map((field) => (
-                  <Badge key={field} variant="secondary" className="text-xs">
-                    {field}
-                  </Badge>
-                ))}
+            {u.description && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <h2 className="text-lg font-bold text-[var(--primary)] mb-3">
+                  À propos
+                </h2>
+                <p className="text-slate-600 leading-relaxed">{u.description}</p>
               </div>
-            </div>
+            )}
 
-            {/* Programs */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-bold text-[var(--primary)] mb-3">
-                Programmes disponibles
-              </h2>
-              <ul className="space-y-2">
-                {u.programs.map((prog, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                    <span className="mt-1 h-4 w-4 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-bold flex items-center justify-center shrink-0">
-                      {i + 1}
-                    </span>
-                    {prog}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {u.fields.length > 0 && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
+                  <BookOpen size={18} className="text-[var(--orange)]" />
+                  Domaines d&apos;enseignement
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {u.fields.map((field) => (
+                    <Badge key={field} variant="secondary" className="text-xs">
+                      {field}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* ── Right: sidebar ── */}
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sticky top-20">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-4">
@@ -127,8 +141,12 @@ export default async function UniversiteDetailPage({
                 <div className="flex justify-between">
                   <span>Pays</span>
                   <span className="font-semibold text-slate-800">
-                    {u.flag} {u.country}
+                    {flag} {u.country}
                   </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Ville</span>
+                  <span className="font-semibold text-slate-800">{u.city}</span>
                 </div>
                 {u.ranking && (
                   <div className="flex justify-between">
@@ -139,7 +157,7 @@ export default async function UniversiteDetailPage({
                 <div className="flex justify-between gap-4">
                   <span className="shrink-0">Frais/an</span>
                   <span className="font-semibold text-slate-800 text-right text-xs">
-                    {u.tuition}
+                    {tuition}
                   </span>
                 </div>
               </div>
@@ -149,7 +167,7 @@ export default async function UniversiteDetailPage({
                 className="w-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
               >
                 <a
-                  href={u.websiteUrl}
+                  href={u.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2"
@@ -164,7 +182,7 @@ export default async function UniversiteDetailPage({
                 variant="outline"
                 className="mt-3 w-full border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10"
               >
-                <Link href="/bourses">
+                <Link href={`/bourses?pays=${encodeURIComponent(u.country)}`}>
                   Voir les bourses pour ce pays
                 </Link>
               </Button>
@@ -173,7 +191,6 @@ export default async function UniversiteDetailPage({
         </div>
       </div>
 
-      {/* Bottom CTA */}
       <div className="mt-16 bg-secondary/30 px-6 py-12 text-center">
         <p className="text-lg font-semibold text-[var(--primary)]">
           Trouve une bourse pour étudier ici

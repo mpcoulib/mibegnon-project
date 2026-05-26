@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mibegnon
 
-## Getting Started
+Plateforme pour aider les élèves ivoiriens à découvrir des bourses d'études et des universités à l'international.
 
-First, run the development server:
+## Stack
+
+- **Framework** : [Next.js 16](https://nextjs.org) (App Router)
+- **Base de données** : PostgreSQL (Supabase) via [Prisma](https://www.prisma.io)
+- **Auth** : [Supabase Auth](https://supabase.com/docs/guides/auth)
+- **UI** : Tailwind CSS 4, Radix UI / shadcn
+- **Scraping** : scripts TypeScript + Claude (voir `scripts/SCRAPER_DOCS.md`)
+
+## Prérequis
+
+- Node.js 20+
+- Compte Supabase (URL + clés anon)
+- `DATABASE_URL` PostgreSQL (pooler Supabase recommandé)
+
+## Installation
 
 ```bash
+npm install
+cp .env.example .env   # puis renseigner les variables
+npx prisma generate
+npx prisma migrate deploy   # ou migrate dev en local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | URL PostgreSQL (Prisma) |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon Supabase |
+| `NEXT_PUBLIC_SITE_URL` | URL du site (callbacks auth), ex. `http://localhost:3000` |
+| `ANTHROPIC_API_KEY` | Scraping, traduction, chatbot Chao (serveur uniquement) |
+| `CHAO_COOKIE_SECRET` | Signature des cookies compteur anonyme (prod obligatoire) |
 
-## Learn More
+## Scripts npm
 
-To learn more about Next.js, take a look at the following resources:
+| Commande | Usage |
+|----------|--------|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | `prisma generate` + build production |
+| `npm run start` | Serveur production |
+| `npm run lint` | ESLint |
+| `npm run scrape` | Scraper regex (ScholarshipRegion) |
+| `npm run scrape:ai` | Scraper Claude (recommandé) |
+| `npm run scrape:dry` | Scraper test (10 posts) |
+| `npm run translate` | Traduction des descriptions FR |
+| `npm run fix-links` | Audit / correction des liens bourses |
+| `npm run chao:avatar` | Regénère `public/chao-avatar.png` et `chao-icon.png` |
+| `npm run test:e2e` | Tests Playwright (dont Chao widget) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Détails du pipeline de scraping : [`scripts/SCRAPER_DOCS.md`](scripts/SCRAPER_DOCS.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Migrations Prisma
 
-## Deploy on Vercel
+Le schéma est versionné sous `prisma/migrations/`. Ne pas utiliser `db push` en production.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx prisma migrate dev --name <nom>   # développement
+npx prisma migrate deploy             # CI / prod
+npx prisma migrate status
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure (aperçu)
+
+```
+app/
+  (public)/     # Pages publiques (bourses, universités, soumettre)
+  (auth)/       # Connexion, inscription
+  (dashboard)/  # Espace connecté (favoris, candidatures, profil)
+lib/
+  actions/      # Server actions (bookmarks, applications, profil)
+  prisma.ts     # Client Prisma singleton
+prisma/         # Schéma + migrations
+scripts/        # Scrapers et seeds
+```
+
+## Licence
+
+Projet privé — voir l'équipe Mibegnon.

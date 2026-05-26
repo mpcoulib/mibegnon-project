@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler (6543) → app runtime
+  directUrl = env("DIRECT_URL")   // direct (5432) → migrations only
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -131,6 +132,7 @@ model Application {
   university  University?  @relation(fields: [universityId], references: [id], onDelete: Cascade)
   documents   Document[]
 
+  @@unique([userId, scholarshipId])
   @@map("applications")
 }
 
