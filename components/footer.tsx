@@ -80,6 +80,11 @@ export default function Footer() {
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
               <li>
+                <Link href="/soutenir" className="hover:text-[var(--primary)] transition-colors">
+                  Nous soutenir
+                </Link>
+              </li>
+              <li>
                 <Link href="/a-propos" className="hover:text-[var(--primary)] transition-colors">
                   Notre mission
                 </Link>

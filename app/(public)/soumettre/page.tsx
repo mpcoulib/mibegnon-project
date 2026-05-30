@@ -2,16 +2,30 @@
 
 import { useState } from "react";
 import { submitScholarship } from "./actions";
+import { TurnstileField } from "@/components/turnstile-field";
 
 export default function SoumettreePage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  const turnstileRequired = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (turnstileRequired && !turnstileToken) {
+      setStatus("error");
+      setErrorMsg("Complète la vérification anti-spam avant d'envoyer.");
+      return;
+    }
+
     setStatus("loading");
 
     const formData = new FormData(e.currentTarget);
+    if (turnstileToken) {
+      formData.set("cf-turnstile-response", turnstileToken);
+    }
+
     const result = await submitScholarship(formData);
 
     if (result.success) {
@@ -26,7 +40,9 @@ export default function SoumettreePage() {
     return (
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <h1 className="text-3xl font-bold text-green-600">Merci !</h1>
-        <p className="mt-4 text-slate-500">Ta soumission a bien été reçue. On la vérifie et on l'ajoute dès que possible.</p>
+        <p className="mt-4 text-slate-500">
+          Ta soumission a bien été reçue. On la vérifie et on l&apos;ajoute dès que possible.
+        </p>
       </div>
     );
   }
@@ -35,11 +51,10 @@ export default function SoumettreePage() {
     <div className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-3xl font-bold text-[var(--primary)]">Soumettre une bourse</h1>
       <p className="mt-2 text-slate-500">
-        Tu connais une bourse qui n'est pas encore sur Mibegnon ? Envoie-nous les infos.
+        Tu connais une bourse qui n&apos;est pas encore sur Mibegnon ? Envoie-nous les infos.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-10 space-y-6">
-
         <div>
           <label className="block text-sm font-medium mb-1">Nom de la bourse *</label>
           <input name="name" required className="w-full border rounded-lg px-3 py-2 text-sm" />
@@ -72,7 +87,9 @@ export default function SoumettreePage() {
 
         <div className="flex items-center gap-2">
           <input name="isFullFunding" type="checkbox" value="true" id="isFullFunding" />
-          <label htmlFor="isFullFunding" className="text-sm">Bourse complète (full funding)</label>
+          <label htmlFor="isFullFunding" className="text-sm">
+            Bourse complète (full funding)
+          </label>
         </div>
 
         <div>
@@ -81,22 +98,26 @@ export default function SoumettreePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Note pour l'équipe (optionnel)</label>
+          <label className="block text-sm font-medium mb-1">Note pour l&apos;équipe (optionnel)</label>
           <textarea name="submitterNote" rows={2} className="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
 
-        {status === "error" && (
-          <p className="text-red-500 text-sm">{errorMsg}</p>
-        )}
+        <div>
+          <TurnstileField
+            onToken={setTurnstileToken}
+            onExpire={() => setTurnstileToken("")}
+          />
+        </div>
+
+        {status === "error" && <p className="text-red-500 text-sm">{errorMsg}</p>}
 
         <button
           type="submit"
-          disabled={status === "loading"}
+          disabled={status === "loading" || (turnstileRequired && !turnstileToken)}
           className="w-full bg-[var(--primary)] text-white rounded-lg py-3 font-medium hover:opacity-90 disabled:opacity-50"
         >
           {status === "loading" ? "Envoi en cours..." : "Soumettre"}
         </button>
-
       </form>
     </div>
   );

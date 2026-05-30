@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(auth)/actions";
 import { LayoutDashboard, Bookmark, ClipboardList, User, LogOut } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const sidebarLinks = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/dashboard/favoris", label: "Mes favoris", icon: Bookmark },

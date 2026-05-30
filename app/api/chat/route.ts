@@ -18,13 +18,15 @@ import { CHAO_SYSTEM_PROMPT } from "@/lib/chao/persona";
 import { buildScholarshipsContext } from "@/lib/chao/scholarships-context";
 import { sseLine } from "@/lib/chao/sse";
 import { parseMessages } from "@/lib/chao/validate";
+import { getClientIpFromRequest } from "@/lib/request-ip";
+import { rateLimitChaoAnonIp } from "@/lib/rate-limit";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-function gateResponse(remaining: number, reason?: string) {
+function gateResponse(remaining: number, reason?: string, status = 403) {
   return NextResponse.json(
     { gated: true, remaining, reason: reason ?? "signup" },
-    { status: 403 }
+    { status }
   );
 }
 
@@ -65,6 +67,12 @@ export async function POST(request: Request) {
 
   let anonCount = 0;
   if (!isLoggedIn) {
+    const ip = getClientIpFromRequest(request);
+    const ipDaily = await rateLimitChaoAnonIp(ip);
+    if (!ipDaily.success) {
+      return gateResponse(0, "rate", 429);
+    }
+
     anonCount = await getAnonMessageCount();
     if (anonCount >= ANON_MESSAGE_LIMIT) {
       return gateResponse(0, "signup");

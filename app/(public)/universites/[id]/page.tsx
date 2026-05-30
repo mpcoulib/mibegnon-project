@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Trophy, BookOpen, DollarSign, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { prisma } from "@/lib/prisma";
+import { getUniversityById } from "@/lib/data/universities";
+
+export const revalidate = 3600;
 
 const countryFlags: Record<string, string> = {
   France: "🇫🇷",
@@ -37,7 +39,7 @@ export default async function UniversiteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const u = await prisma.university.findUnique({ where: { id } });
+  const u = await getUniversityById(id);
 
   if (!u) notFound();
 

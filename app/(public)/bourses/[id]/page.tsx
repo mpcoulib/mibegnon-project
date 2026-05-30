@@ -7,6 +7,9 @@ import { SaveButton } from "@/components/save-button";
 import { ApplyButton } from "@/components/apply-button";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getScholarshipById } from "@/lib/data/scholarships";
+
+export const revalidate = 3600;
 
 const levelLabels: Record<string, string> = {
   BACHELOR: "Licence", MASTER: "Master", DOCTORAT: "Doctorat",
@@ -55,7 +58,7 @@ export default async function BourseDetailPage({
 }) {
   const { id } = await params;
 
-  const s = await prisma.scholarship.findUnique({ where: { id } });
+  const s = await getScholarshipById(id);
   if (!s) notFound();
 
   const supabase = await createClient();

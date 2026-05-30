@@ -4,6 +4,9 @@ import { BoursesFilters } from "@/components/bourses-filters";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { categoryInfo } from "@/lib/category-info";
+import { getScholarshipsForList } from "@/lib/data/scholarships";
+
+export const revalidate = 3600;
 
 export default async function BoursesPage({
   searchParams,
@@ -34,7 +37,7 @@ export default async function BoursesPage({
       : {}),
   };
 
-  const raw = await prisma.scholarship.findMany({ where });
+  const raw = await getScholarshipsForList(where);
 
   function shuffle<T>(arr: T[]): T[] {
     const a = [...arr];

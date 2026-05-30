@@ -3,16 +3,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Search, Send, Sparkles } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { User, Search, Send, Heart } from "lucide-react";
 import { ScholarshipCard } from "@/components/scholarship-card";
+import { getFeaturedScholarships } from "@/lib/data/scholarships";
+
+export const revalidate = 3600;
 
 export default async function HomePage() {
-  const featuredScholarships = await prisma.scholarship.findMany({
-    where: { isActive: true, isTranslated: true },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-  });
+  const featuredScholarships = await getFeaturedScholarships();
 
   return (
     <div className="flex flex-col">
@@ -138,6 +136,31 @@ export default async function HomePage() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Community support ── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--orange)]/15 via-white to-[var(--primary)]/10 px-6 py-16">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--orange)]/20 text-[var(--orange)]">
+            <Heart size={28} aria-hidden />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-[var(--primary)] sm:text-3xl">
+              Garde Mibegnon gratuit pour tous
+            </h2>
+            <p className="mt-2 text-slate-600 leading-relaxed max-w-xl">
+              Mibegnon vit grâce à la communauté : serveurs, Chao et bourses à jour.
+              Un petit soutien, un grand impact pour les élèves ivoiriens.
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="shrink-0 rounded-full bg-[var(--orange)] text-white hover:bg-[var(--orange)]/90 font-semibold px-8"
+          >
+            <Link href="/soutenir">Nous soutenir</Link>
+          </Button>
         </div>
       </section>
 

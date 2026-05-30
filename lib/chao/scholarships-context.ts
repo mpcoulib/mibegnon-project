@@ -1,21 +1,8 @@
-import { prisma } from "@/lib/prisma";
+import { getScholarshipsForChaoContext } from "@/lib/data/scholarships";
 
 export async function buildScholarshipsContext(): Promise<string> {
   try {
-    const rows = await prisma.scholarship.findMany({
-      where: { isActive: true },
-      take: 12,
-      orderBy: [{ isFullFunding: "desc" }, { updatedAt: "desc" }],
-      select: {
-        id: true,
-        name: true,
-        country: true,
-        provider: true,
-        deadline: true,
-        isFullFunding: true,
-        academicLevels: true,
-      },
-    });
+    const rows = await getScholarshipsForChaoContext();
 
     if (rows.length === 0) {
       return "Aucune bourse en base pour le moment. Oriente l'utilisateur vers /bourses pour explorer.";

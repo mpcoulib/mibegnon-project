@@ -38,6 +38,13 @@ Ouvre [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | URL du site (callbacks auth), ex. `http://localhost:3000` |
 | `ANTHROPIC_API_KEY` | Scraping, traduction, chatbot Chao (serveur uniquement) |
 | `CHAO_COOKIE_SECRET` | Signature des cookies compteur anonyme (prod obligatoire) |
+| `UPSTASH_REDIS_REST_URL` | Redis Upstash (rate-limit Chao + soumissions) |
+| `UPSTASH_REDIS_REST_TOKEN` | Token Upstash |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile (widget `/soumettre`) |
+| `TURNSTILE_SECRET_KEY` | Secret Turnstile (vérif serveur) |
+| `STRIPE_SECRET_KEY` | Clé secrète Stripe (Checkout + webhooks) |
+| `STRIPE_WEBHOOK_SECRET` | Secret du endpoint webhook Stripe |
+| `DONATION_MONTHLY_GOAL_CENTS` | Objectif mensuel affiché (défaut : 50000 = 500 €) |
 
 ## Scripts npm
 

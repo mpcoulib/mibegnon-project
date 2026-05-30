@@ -49,12 +49,33 @@ npm run scrape:ai:dry
 | Actions | `lib/actions/{bookmarks,applications,user}.ts` |
 | Scrapers | `scripts/scrape-ai.ts`, `scripts/SCRAPER_DOCS.md` |
 
+## Universités (pipeline bourses → fiches)
+
+- U0 `npm run scholarships:expire` — désactive les bourses dont `deadline < now` (deadline null inchangée)
+- U1–U4 : voir `scripts/UNIVERSITIES_PIPELINE.md` — extraction IA, recherche web, validation, seed `isActive=false`
+- U5 `scripts/publish-universities.ts` — publication manuelle après relecture
+
+## Dons (Stripe)
+
+- Page : `app/(public)/soutenir/` — Checkout hébergé Stripe (aucune carte côté client)
+- Actions : `lib/actions/donate.ts` — validation montant serveur, création `Donation` PENDING
+- Webhook : `app/api/webhooks/stripe/route.ts` — signature + idempotence `stripe_webhook_events`
+- Stats publiques : `GET /api/donations/stats` — agrégats Prisma uniquement (pas de lecture table via Supabase anon)
+- RLS : `donations` et `stripe_webhook_events` sans policy → anon/authenticated refusés
+
 ## Chao (chatbot)
 
 - Widget global : `components/chao-widget.tsx` monté dans `app/layout.tsx`
 - API : `POST /api/chat` — Anthropic Haiku, prompt cache sur le persona, contexte bourses dynamique
-- Anonymes : max 3 messages (`chao_anon` cookie signé httpOnly) + plafond IP/heure
+- Anonymes : max 3 messages (`chao_anon` cookie signé httpOnly) + cookie IP/heure + **Upstash** 20 req/IP/jour (`lib/rate-limit.ts`) → 429 sans appel LLM
 - Avatars : `public/chao-avatar.png`, `public/chao-icon.png` via `npm run chao:avatar`
+
+## Perf / sécurité
+
+- Indexes : migration `add_indexes` (scholarships, universities, FK bookmarks/applications/documents)
+- Pages publiques catalogue : `revalidate = 3600` + `unstable_cache` dans `lib/data/{scholarships,universities}.ts`
+- Headers : `next.config.ts` (CSP, HSTS prod, X-Frame-Options, nosniff, Referrer-Policy)
+- `/soumettre` : Turnstile (`TURNSTILE_*`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`) + rate-limit IP (`UPSTASH_*`)
 
 ## Pièges connus
 

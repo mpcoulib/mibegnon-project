@@ -11,7 +11,8 @@ const navLinks = [
   { href: "/", label: "Accueil" },
   { href: "/bourses", label: "Bourses" },
   { href: "/universites", label: "Universités" },
-  { href: "/soumettre", label: "Nous soumettre une opeortunite de bourse" },
+  { href: "/soutenir", label: "Nous soutenir" },
+  { href: "/soumettre", label: "Soumettre une bourse" },
 ];
 
 export default function Navbar({ user }: { user: User | null }) {

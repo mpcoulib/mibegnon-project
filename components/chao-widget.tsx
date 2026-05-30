@@ -117,6 +117,11 @@ export function ChaoWidget() {
         if (data.gated) {
           setGated(true);
           setRemaining(data.remaining ?? 0);
+          if (res.status === 429 || data.reason === "rate") {
+            setError(
+              "Trop de messages aujourd'hui depuis cette connexion. Reviens demain ou crée un compte."
+            );
+          }
           // Retirer le message utilisateur en attente + la bulle assistant vide
           setMessages((prev) => prev.slice(0, -2));
           return;

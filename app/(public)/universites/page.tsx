@@ -1,7 +1,9 @@
 import { UniversityCard } from "@/components/university-card";
 import { UniversitesFilters } from "@/components/universites-filters";
-import { prisma } from "@/lib/prisma";
 import { Suspense } from "react";
+import { getUniversitiesForList } from "@/lib/data/universities";
+
+export const revalidate = 3600;
 
 export default async function UniversitesPage({
   searchParams,
@@ -23,10 +25,7 @@ export default async function UniversitesPage({
       : {}),
   };
 
-  const universities = await prisma.university.findMany({
-    where,
-    orderBy: { ranking: "asc" },
-  });
+  const universities = await getUniversitiesForList(where);
 
   return (
     <div className="flex flex-col">
