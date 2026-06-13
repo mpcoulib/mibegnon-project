@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/expire-scholarships",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

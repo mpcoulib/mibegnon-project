@@ -51,7 +51,7 @@ npm run scrape:ai:dry
 
 ## Universités (pipeline bourses → fiches)
 
-- U0 `npm run scholarships:expire` — désactive les bourses dont `deadline < now` (deadline null inchangée)
+- **Expire bourses** : cron Vercel `GET /api/cron/expire-scholarships` daily 03:00 UTC (`vercel.json`) — désactive `deadline < now`, purge après 90j sans refs (`Application`/`SavedScholarship`/`Bookmark`), log `cron_runs`, `revalidateTag("scholarships")`. Auth : `Authorization: Bearer ${CRON_SECRET}`. Manuel : `npm run scholarships:expire`
 - U1–U4 : voir `scripts/UNIVERSITIES_PIPELINE.md` — extraction IA, recherche web, validation, seed `isActive=false`
 - U5 `scripts/publish-universities.ts` — publication manuelle après relecture
 

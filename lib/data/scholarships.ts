@@ -19,7 +19,11 @@ export function getScholarshipsForList(where: Prisma.ScholarshipWhereInput) {
 
 export function getScholarshipById(id: string) {
   return unstable_cache(
-    async () => prisma.scholarship.findUnique({ where: { id } }),
+    async () => {
+      const row = await prisma.scholarship.findUnique({ where: { id } });
+      if (!row?.isActive) return null;
+      return row;
+    },
     ["scholarship", id],
     { revalidate: REVALIDATE_SECONDS, tags: ["scholarships", `scholarship:${id}`] }
   )();

@@ -87,6 +87,7 @@ model Scholarship {
   applications Application[]
 
   @@index([isActive, isTranslated])
+  @@index([isActive, deadline])
   @@index([category])
   @@index([country])
   @@map("scholarships")
@@ -234,4 +235,17 @@ model StripeWebhookEvent {
   createdAt     DateTime @default(now())
 
   @@map("stripe_webhook_events")
+}
+
+model CronRun {
+  id          String   @id @default(cuid())
+  job         String
+  deactivated Int      @default(0)
+  purged      Int      @default(0)
+  skipped     Int      @default(0)
+  errors      String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([job, createdAt])
+  @@map("cron_runs")
 }
