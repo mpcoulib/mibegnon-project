@@ -50,3 +50,4 @@ next-env.d.ts
 
 # university pipeline artifacts (see scripts/UNIVERSITIES_PIPELINE.md)
 /data/*.json
+.env*.local
