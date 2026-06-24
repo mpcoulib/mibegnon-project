@@ -28,6 +28,9 @@
     "universities:validate:dry": "tsx scripts/validate-researched-universities.ts --dry-run",
     "universities:seed": "tsx scripts/seed-researched-universities.ts",
     "universities:seed:dry": "tsx scripts/seed-researched-universities.ts --dry-run",
+    "links:audit": "tsx scripts/audit-scholarship-links.ts",
+    "links:audit:http": "tsx scripts/audit-scholarship-links.ts --http-only",
+    "links:audit:dry": "tsx scripts/audit-scholarship-links.ts --http-only --limit 20",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

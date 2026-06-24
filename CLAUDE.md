@@ -55,6 +55,13 @@ npm run scrape:ai:dry
 - U1–U4 : voir `scripts/UNIVERSITIES_PIPELINE.md` — extraction IA, recherche web, validation, seed `isActive=false`
 - U5 `scripts/publish-universities.ts` — publication manuelle après relecture
 
+## Audit liens bourses (read-only)
+
+- `npm run links:audit` — visite chaque `Scholarship.link` → `data/link_audit_report.json` + `link_audit_summary.md`
+- `npm run links:audit:http` — palier HTTP seul (sans LLM)
+- Voir `scripts/LINK_AUDIT.md` — HTTP → Haiku → Sonnet → juge cross-provider (DEAD gated)
+- Aucune écriture DB ; `propose_deactivate` = suggestion humaine
+
 ## Dons (Stripe)
 
 - Page : `app/(public)/soutenir/` — Checkout hébergé Stripe (aucune carte côté client)

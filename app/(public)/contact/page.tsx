@@ -30,10 +30,10 @@ export default function ContactPage() {
               <h3 className="font-bold text-[var(--primary)] mb-1">Email</h3>
               <p className="text-sm text-slate-500 mb-3">Pour toute question générale</p>
               <a
-                href="mailto:contact@mibegnon.com"
-                className="text-sm font-medium text-[var(--primary)] hover:underline"
+                href="mailto:mcabdoul00@gmail.com?subject=Mibegnon%20%E2%80%94%20Question%20g%C3%A9n%C3%A9rale"
+                className="text-sm font-medium text-[var(--primary)] hover:underline break-all"
               >
-                contact@mibegnon.com
+                mcabdoul00@gmail.com
               </a>
             </CardContent>
           </Card>
@@ -46,10 +46,10 @@ export default function ContactPage() {
               <h3 className="font-bold text-[var(--primary)] mb-1">Signaler un problème</h3>
               <p className="text-sm text-slate-500 mb-3">Bug, lien cassé, bourse incorrecte</p>
               <a
-                href="mailto:bug@mibegnon.com"
-                className="text-sm font-medium text-[var(--primary)] hover:underline"
+                href="mailto:mcabdoul00@gmail.com?subject=Mibegnon%20%E2%80%94%20Signaler%20un%20probl%C3%A8me"
+                className="text-sm font-medium text-[var(--primary)] hover:underline break-all"
               >
-                bug@mibegnon.com
+                mcabdoul00@gmail.com
               </a>
             </CardContent>
           </Card>
@@ -71,8 +71,8 @@ export default function ContactPage() {
           <p className="font-semibold text-slate-700">Tu veux proposer une bourse ou une université ?</p>
           <p className="mt-1 text-sm text-slate-500">
             Envoie-nous les détails à{" "}
-            <a href="mailto:bourses@mibegnon.com" className="text-[var(--primary)] hover:underline font-medium">
-              bourses@mibegnon.com
+            <a href="mailto:mcabdoul00@gmail.com?subject=Mibegnon%20%E2%80%94%20Proposer%20une%20bourse%20ou%20universit%C3%A9" className="text-[var(--primary)] hover:underline font-medium break-all">
+              mcabdoul00@gmail.com
             </a>{" "}
             et on l&apos;étudiera avec plaisir.
           </p>

@@ -50,4 +50,6 @@ next-env.d.ts
 
 # university pipeline artifacts (see scripts/UNIVERSITIES_PIPELINE.md)
 /data/*.json
+/data/link_audit_summary.md
 .env*.local
+model_selection_for_software_engineering.md.pdf
