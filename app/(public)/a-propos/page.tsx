@@ -117,6 +117,7 @@ export default function AProposPage() {
                     src="/massa.jpg"
                     alt="Massa Coulibaly, fondateur de Mibegnon"
                     fill
+                    sizes="(min-width: 640px) 192px, 100vw"
                     className="object-cover object-top"
                   />
                 </div>

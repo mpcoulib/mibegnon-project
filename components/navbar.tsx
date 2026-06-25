@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/(auth)/actions";
+import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 const navLinks = [
@@ -15,9 +16,19 @@ const navLinks = [
   { href: "/soumettre", label: "Soumettre une bourse" },
 ];
 
-export default function Navbar({ user }: { user: User | null }) {
+export default function Navbar({ user: initialUser = null }: { user?: User | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(initialUser);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) =>
+      setUser(session?.user ?? null)
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const name = user?.user_metadata?.full_name ?? user?.email ?? "";
   const initials = name

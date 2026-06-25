@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
-import { ChaoWidget } from "@/components/chao-widget";
+import ChaoWidgetLoader from "@/components/chao-widget-loader";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,12 +42,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <link
+          rel="preconnect"
+          href="https://pofsfuydfwvctkgmiios.supabase.co"
+          crossOrigin=""
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://pofsfuydfwvctkgmiios.supabase.co"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
         {children}
-        <ChaoWidget />
+        <ChaoWidgetLoader />
       </body>
     </html>
   );

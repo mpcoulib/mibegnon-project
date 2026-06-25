@@ -20,6 +20,7 @@ export default async function HomePage() {
           src="/hero.jpeg"
           alt="Élève ivoirien levant la main en classe"
           fill
+          sizes="100vw"
           className="object-cover object-center"
           priority
         />

@@ -89,6 +89,7 @@ export default function ContactPage() {
                     src="/massa.jpg"
                     alt="Massa Coulibaly"
                     fill
+                    sizes="56px"
                     className="object-cover object-top"
                   />
                 </div>

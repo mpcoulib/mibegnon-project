@@ -236,7 +236,6 @@ export function ChaoWidget() {
               alt=""
               width={44}
               height={44}
-              unoptimized
               className="h-11 w-11 rounded-full border-2 border-white/30 object-cover"
             />
             <div className="min-w-0 flex-1">
@@ -388,7 +387,6 @@ export function ChaoWidget() {
             alt=""
             width={40}
             height={40}
-            unoptimized
             className="h-10 w-10 rounded-full object-cover"
           />
         )}
