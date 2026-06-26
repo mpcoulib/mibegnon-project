@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
 import { buildContentSecurityPolicy } from "./lib/security/csp";
 
 const isProd = process.env.NODE_ENV === "production";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: !isProd,
+});
 
 const securityHeaders = [
   {
@@ -48,4 +55,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Serwist is disabled outside prod (`disable: !isProd`) and injects a webpack
+// config. Only wrap in prod so `next dev` (Turbopack) stays clean — no warning.
+export default isProd ? withSerwist(nextConfig) : nextConfig;

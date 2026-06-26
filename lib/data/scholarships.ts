@@ -4,15 +4,64 @@ import { prisma } from "@/lib/prisma";
 
 const REVALIDATE_SECONDS = 3600;
 
-function listCacheKey(where: Prisma.ScholarshipWhereInput): string {
-  return JSON.stringify(where);
+/** Max rows per list request (mobile / low-bandwidth cap). */
+export const SCHOLARSHIP_LIST_PAGE_SIZE = 60;
+
+export const scholarshipListSelect = {
+  id: true,
+  name: true,
+  provider: true,
+  country: true,
+  category: true,
+  isFullFunding: true,
+  deadline: true,
+  academicLevels: true,
+} satisfies Prisma.ScholarshipSelect;
+
+export type ScholarshipListItem = Prisma.ScholarshipGetPayload<{
+  select: typeof scholarshipListSelect;
+}>;
+
+export interface ScholarshipListOptions {
+  take?: number;
+  cursor?: string;
 }
 
-export function getScholarshipsForList(where: Prisma.ScholarshipWhereInput) {
+function listCacheKey(
+  where: Prisma.ScholarshipWhereInput,
+  options?: ScholarshipListOptions
+): string {
+  return JSON.stringify({ where, options });
+}
+
+export function getScholarshipsForList(
+  where: Prisma.ScholarshipWhereInput,
+  options?: ScholarshipListOptions
+) {
+  const key = listCacheKey(where, options);
+  const take = options?.take ?? SCHOLARSHIP_LIST_PAGE_SIZE;
+
+  return unstable_cache(
+    async () =>
+      prisma.scholarship.findMany({
+        where,
+        select: scholarshipListSelect,
+        take,
+        ...(options?.cursor
+          ? { cursor: { id: options.cursor }, skip: 1 }
+          : {}),
+        orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+      }),
+    ["scholarships-list", key],
+    { revalidate: REVALIDATE_SECONDS, tags: ["scholarships"] }
+  )();
+}
+
+export function getScholarshipListCount(where: Prisma.ScholarshipWhereInput) {
   const key = listCacheKey(where);
   return unstable_cache(
-    async () => prisma.scholarship.findMany({ where }),
-    ["scholarships-list", key],
+    async () => prisma.scholarship.count({ where }),
+    ["scholarships-count", key],
     { revalidate: REVALIDATE_SECONDS, tags: ["scholarships"] }
   )();
 }
@@ -34,6 +83,7 @@ export function getFeaturedScholarships() {
     async () =>
       prisma.scholarship.findMany({
         where: { isActive: true, isTranslated: true },
+        select: scholarshipListSelect,
         orderBy: { createdAt: "desc" },
         take: 3,
       }),
@@ -60,6 +110,20 @@ export function getScholarshipsForChaoContext() {
         },
       }),
     ["scholarships-chao-context"],
+    { revalidate: REVALIDATE_SECONDS, tags: ["scholarships"] }
+  )();
+}
+
+export function getScholarshipIdsForStaticParams(limit = 200) {
+  return unstable_cache(
+    async () =>
+      prisma.scholarship.findMany({
+        where: { isActive: true, isTranslated: true },
+        select: { id: true },
+        orderBy: { updatedAt: "desc" },
+        take: limit,
+      }),
+    ["scholarships-static-params", String(limit)],
     { revalidate: REVALIDATE_SECONDS, tags: ["scholarships"] }
   )();
 }

@@ -3,9 +3,18 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Trophy, BookOpen, DollarSign, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getUniversityById } from "@/lib/data/universities";
+import { getUniversityById, getUniversityIdsForStaticParams } from "@/lib/data/universities";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const rows = await getUniversityIdsForStaticParams(200);
+    return rows.map(({ id }) => ({ id }));
+  } catch {
+    return [];
+  }
+}
 
 const countryFlags: Record<string, string> = {
   France: "🇫🇷",

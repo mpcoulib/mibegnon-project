@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from "@/components/save-button";
-import type { Scholarship } from "@prisma/client";
+import type { ScholarshipListItem } from "@/lib/data/scholarships";
 import { categoryInfo } from "@/lib/category-info";
 import { Globe2 } from "lucide-react";
 import { getCountryPath } from "@/lib/country-map";
@@ -55,11 +55,11 @@ function isUrgent(date: Date | null): boolean {
 export function ScholarshipCard({
   scholarship: s,
   featured = false,
-  isSaved = false,
+  initialSaved = false,
 }: {
-  scholarship: Scholarship;
+  scholarship: ScholarshipListItem;
   featured?: boolean;
-  isSaved?: boolean;
+  initialSaved?: boolean;
 }) {
   const countryPath = getCountryPath(s.country);
   const flag = getFlag(s.country);
@@ -162,7 +162,7 @@ export function ScholarshipCard({
           >
             <Link href={`/bourses/${s.id}`}>Voir les détails</Link>
           </Button>
-          <SaveButton scholarshipId={s.id} isSaved={isSaved} />
+          <SaveButton scholarshipId={s.id} initialSaved={initialSaved} />
         </div>
       </CardContent>
     </Card>

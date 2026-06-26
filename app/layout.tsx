@@ -1,19 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Playfair_Display } from "next/font/google";
+import { Geist } from "next/font/google";
 import ChaoWidgetLoader from "@/components/chao-widget-loader";
+import SerwistRegister from "@/components/serwist-register";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["700"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -54,11 +47,12 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${playfair.variable} antialiased`}
+        className={`${geistSans.variable} antialiased`}
         suppressHydrationWarning
       >
         {children}
         <ChaoWidgetLoader />
+        <SerwistRegister />
       </body>
     </html>
   );

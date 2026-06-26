@@ -1,17 +1,24 @@
 import { Suspense } from "react";
-import { ScholarshipCard } from "@/components/scholarship-card";
+import { BoursesScholarshipGrid } from "@/components/bourses-scholarship-grid";
 import { BoursesFilters } from "@/components/bourses-filters";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
 import { categoryInfo } from "@/lib/category-info";
-import { getScholarshipsForList } from "@/lib/data/scholarships";
+import {
+  getScholarshipListCount,
+  getScholarshipsForList,
+} from "@/lib/data/scholarships";
 
 export const revalidate = 3600;
 
 export default async function BoursesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; niveau?: string; q?: string; category?: string }>;
+  searchParams: Promise<{
+    type?: string;
+    niveau?: string;
+    q?: string;
+    category?: string;
+    cursor?: string;
+  }>;
 }) {
   const params = await searchParams;
 
@@ -22,9 +29,7 @@ export default async function BoursesPage({
     isTranslated: true,
     ...(params.type === "funded" ? { isFullFunding: true } : {}),
     ...(params.type === "partial" ? { isFullFunding: false } : {}),
-    ...(params.niveau
-      ? { academicLevels: { has: params.niveau } }
-      : {}),
+    ...(params.niveau ? { academicLevels: { has: params.niveau } } : {}),
     ...(params.category ? { category: params.category } : {}),
     ...(params.q
       ? {
@@ -37,35 +42,13 @@ export default async function BoursesPage({
       : {}),
   };
 
-  const raw = await getScholarshipsForList(where);
-
-  function shuffle<T>(arr: T[]): T[] {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  const tagged = shuffle(raw.filter((s) => s.category !== null));
-  const untagged = shuffle(raw.filter((s) => s.category === null));
-  const scholarships = [...tagged, ...untagged];
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let savedIds: string[] = [];
-  if (user) {
-    const saved = await prisma.savedScholarship.findMany({
-      where: { userId: user.id },
-      select: { scholarshipId: true },
-    });
-    savedIds = saved.map((s: { scholarshipId: string }) => s.scholarshipId);
-  }
+  const [scholarships, totalCount] = await Promise.all([
+    getScholarshipsForList(where, { cursor: params.cursor }),
+    getScholarshipListCount(where),
+  ]);
 
   return (
     <div className="flex flex-col">
-      {/* Page header */}
       <section className="bg-[var(--primary)] px-6 py-14 text-white">
         <div className="mx-auto max-w-6xl">
           <p className="text-sm font-medium text-white/60 uppercase tracking-widest mb-2">
@@ -73,12 +56,12 @@ export default async function BoursesPage({
           </p>
           <h1 className="text-4xl font-bold">Toutes les bourses</h1>
           <p className="mt-2 text-white/70">
-            {scholarships.length} bourse{scholarships.length > 1 ? "s" : ""} disponible{scholarships.length > 1 ? "s" : ""}
+            {totalCount} bourse{totalCount > 1 ? "s" : ""} disponible
+            {totalCount > 1 ? "s" : ""}
           </p>
         </div>
       </section>
 
-      {/* Content */}
       <div className="mx-auto w-full max-w-6xl px-6 py-10">
         <Suspense fallback={<div className="h-24 rounded-xl bg-slate-100 animate-pulse" />}>
           <BoursesFilters />
@@ -104,16 +87,15 @@ export default async function BoursesPage({
         )}
 
         <p className="mt-6 mb-4 text-sm text-slate-500">
-          {scholarships.length} bourse{scholarships.length > 1 ? "s" : ""} trouvée
+          {scholarships.length} bourse{scholarships.length > 1 ? "s" : ""} affichée
           {scholarships.length > 1 ? "s" : ""}
+          {totalCount > scholarships.length
+            ? ` sur ${totalCount} (charge les plus récentes en priorité)`
+            : ""}
         </p>
 
         {scholarships.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {scholarships.map((s) => (
-              <ScholarshipCard key={s.id} scholarship={s} isSaved={savedIds.includes(s.id)} />
-            ))}
-          </div>
+          <BoursesScholarshipGrid scholarships={scholarships} />
         ) : (
           <div className="mt-16 text-center">
             <p className="text-2xl">🔍</p>

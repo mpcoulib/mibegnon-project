@@ -62,7 +62,7 @@ export default async function FavorisPage() {
                   <ScholarshipCard
                     key={s.id}
                     scholarship={s}
-                    isSaved={savedIds.has(s.id)}
+                    initialSaved={savedIds.has(s.id)}
                   />
                 ))}
               </div>

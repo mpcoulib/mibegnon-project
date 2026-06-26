@@ -3,21 +3,39 @@
 import { useState, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { toggleBookmark } from "@/lib/actions/bookmarks";
+import { useSavedScholarshipIds } from "@/components/saved-scholarship-context";
 
 export function SaveButton({
   scholarshipId,
-  isSaved: initial,
+  initialSaved = false,
 }: {
   scholarshipId: string;
-  isSaved: boolean;
+  initialSaved?: boolean;
 }) {
-  const [saved, setSaved] = useState(initial);
+  const savedCtx = useSavedScholarshipIds();
+  const [localSaved, setLocalSaved] = useState<boolean | null>(null);
   const [isPending, start] = useTransition();
+
+  const saved =
+    localSaved !== null
+      ? localSaved
+      : savedCtx?.isLoaded
+        ? savedCtx.isSaved(scholarshipId)
+        : initialSaved;
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
-    setSaved((prev) => !prev);
-    start(() => toggleBookmark(scholarshipId));
+    const next = !saved;
+    setLocalSaved(next);
+    savedCtx?.setSaved(scholarshipId, next);
+    start(async () => {
+      try {
+        await toggleBookmark(scholarshipId);
+      } catch {
+        setLocalSaved(!next);
+        savedCtx?.setSaved(scholarshipId, !next);
+      }
+    });
   }
 
   return (
