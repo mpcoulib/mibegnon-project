@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { signIn } from "../actions";
+import { safeAuthNext } from "@/lib/auth/safe-next";
 
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
+  searchParams: Promise<{ error?: string; success?: string; next?: string; email?: string }>;
 }) {
-  const { error, success } = await searchParams;
+  const { error, success, next, email } = await searchParams;
+  const isAdmin = (next ?? "").startsWith("/admin");
 
   return (
     <div className="w-full max-w-md">
@@ -15,10 +17,12 @@ export default async function ConnexionPage({
         {/* Heading */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-[var(--primary)]">
-            Connecte-toi
+            {isAdmin ? "Connexion admin" : "Connecte-toi"}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Accède à tes bourses sauvegardées et à tes candidatures.
+            {isAdmin
+              ? "Accède au tableau d'accompagnement."
+              : "Accède à tes bourses sauvegardées et à tes candidatures."}
           </p>
         </div>
 
@@ -36,6 +40,7 @@ export default async function ConnexionPage({
 
         {/* Form */}
         <form action={signIn} className="space-y-4">
+          <input type="hidden" name="next" value={safeAuthNext(next)} />
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Adresse email
@@ -44,6 +49,7 @@ export default async function ConnexionPage({
               type="email"
               name="email"
               required
+              defaultValue={email ?? ""}
               placeholder="toi@exemple.com"
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
             />

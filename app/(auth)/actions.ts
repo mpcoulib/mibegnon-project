@@ -2,19 +2,26 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeAuthNext } from "@/lib/auth/safe-next";
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const next = safeAuthNext(formData.get("next"));
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect(`/connexion?error=${encodeURIComponent("Email ou mot de passe incorrect.")}`);
+    const q = new URLSearchParams({
+      error: "Email ou mot de passe incorrect.",
+      next,
+    });
+    if (email) q.set("email", email);
+    redirect(`/connexion?${q.toString()}`);
   }
 
-  redirect("/dashboard");
+  redirect(next);
 }
 
 export async function signUp(formData: FormData) {

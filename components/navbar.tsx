@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/", label: "Accueil" },
   { href: "/bourses", label: "Bourses" },
   { href: "/universites", label: "Universités" },
+  { href: "/accompagnement", label: "Accompagnement" },
   { href: "/soutenir", label: "Nous soutenir" },
   { href: "/soumettre", label: "Soumettre une bourse" },
 ];

@@ -77,6 +77,26 @@ npm run scrape:ai:dry
 - Anonymes : max 3 messages (`chao_anon` cookie signé httpOnly) + cookie IP/heure + **Upstash** 20 req/IP/jour (`lib/rate-limit.ts`) → 429 sans appel LLM
 - Avatars : `public/chao-avatar.png`, `public/chao-icon.png` via `npm run chao:avatar`
 
+## Accompagnement (parcours payant, 2 000 FCFA Wave)
+
+- Pipeline : `CoachingLead.stage` enum `CoachingStage` (`NOUVEAU → PAIEMENT_DEMANDE → RECU_ENVOYE → PAYE → COMPTE_INVITE → ACTIF`, archives `TERMINE/REJETE/INJOIGNABLE`) ; libellés/ordre dans `lib/coaching/stages.ts`
+- Tables : `coaching_leads`, `payment_receipts`, `message_logs`, `stage_events`, `coaching_files`, `coaching_notes`, `curated_items`, `activation_tokens` — RLS sans policy (server-only), migration `coaching`
+- Lead ≠ compte : `userId` nullable, lié à l'activation ; `email` optionnel à l'intérêt, requis à la création du compte Mibegnon
+- Admin : `User.role` (`UserRole`), bootstrap via `ADMIN_EMAILS` (`lib/auth/admin.ts` → `requireAdmin()`, 404 si non-admin) ; routes `app/(admin)/admin/...`, matcher `/admin/:path*` dans `proxy.ts`
+- Board : `/admin/accompagnement` (kanban), `/admin/accompagnement/[id]`, `/admin/accompagnement/archives` ; changement d'étape = `moveLeadStage` (`lib/actions/coaching-admin.ts`) + `StageEvent`
+- Public : `/accompagnement` (formulaire 3 étapes, email optionnel, série + cohorte), `/accompagnement/paiement/[ref]` (ticket Wave + upload reçu → bucket privé `coaching`), `/accompagnement/activer/[token]`
+- Élève : `/dashboard/accompagnement` (liste curated, conseils partagés, fichiers) une fois `lead.userId` lié
+- Storage : `SUPABASE_SERVICE_ROLE_KEY` + bucket privé `coaching` (créé au premier upload). Wave : `COACHING_WAVE_NUMBER`, `COACHING_WAVE_NAME`, `COACHING_WHATSAPP_NUMBER`, `COACHING_DEFAULT_COHORT`
+- Messages : `lib/messaging/send.ts` (WhatsApp Twilio → SMS fallback → email Resend). Templates dans `lib/messaging/templates.ts`. Admin : picker + `MessageLog`. Sans Twilio, status `logged` + lien wa.me. Après le formulaire : envoi auto `paiement_wave` + étape `PAIEMENT_DEMANDE`. Accusé `recu_recu` après upload de reçu. Admin « Confirmer et envoyer le lien » = reçu + token + `paiement_confirme`.
+- Env messaging : `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, `TWILIO_SMS_FROM`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`
+- Parent : `CoachingLead.parentPhone` optionnel (formulaire Contact)
+- « À relancer » : colonne kanban + filtre `?relance=1` + badges (`STALE_RULES` / `staleInfo`)
+- Reste à faire : templates Meta (fenêtre 24 h), CinetPay/Wave Checkout
+- Ops admin : `/admin/accompagnement/stats` (entonnoir, temps médian par étape, semaines, cohortes — `lib/data/coaching-stats.ts`), `/admin/accompagnement/cohortes` (assigner/renommer, copier numéros WhatsApp), `/admin/utilisateurs` (rôles) ; actions dans `lib/actions/coaching-ops.ts`
+- Rétention : cron `GET /api/cron/purge-coaching` daily 03:30 UTC (`lib/coaching/purge.ts`) — leads non payés/rejetés/injoignables 90 j, reçus confirmés 12 mois, refusés 90 j, tokens expirés +30 j ; objets Storage supprimés si service role ; manuel `npm run coaching:purge[:dry]`. Durées alignées sur `/confidentialite#accompagnement`
+- Légal : `/cgu#accompagnement` (prix, remboursement, règles groupe WhatsApp, mineurs), `/confidentialite#accompagnement` — à lier depuis la case de consentement du formulaire
+- Chao connaît l'offre (`lib/chao/persona.ts`) : ne donne jamais de numéro Wave, renvoie vers `/accompagnement`
+
 ## Perf / sécurité
 
 - Indexes : migration `add_indexes` (scholarships, universities, FK bookmarks/applications/documents)

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Search, Send, Heart } from "lucide-react";
+import { User, Search, Send, Heart, ListChecks, MessageCircle, Users, ArrowRight } from "lucide-react";
 import { ScholarshipCard } from "@/components/scholarship-card";
 import { getFeaturedScholarships } from "@/lib/data/scholarships";
 
@@ -54,6 +54,13 @@ export default async function HomePage() {
                 className="rounded-full bg-white/20 border border-white text-white hover:bg-white/30 font-semibold px-8"
               >
                 <Link href="/universites">Voir les universités</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full bg-[var(--gold)] text-[var(--primary)] hover:bg-[var(--gold)]/90 font-semibold px-8"
+              >
+                <Link href="/accompagnement#inscription">Être accompagné(e)</Link>
               </Button>
             </div>
           </div>
@@ -136,6 +143,104 @@ export default async function HomePage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Accompagnement personnalisé ── */}
+      <section className="relative overflow-hidden bg-[var(--primary)] px-6 py-20 text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-[var(--gold)]/20 blur-3xl" />
+
+        <div className="relative mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-5">
+          <div className="lg:col-span-3">
+            <p className="inline-flex items-center gap-2 rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[var(--gold)]">
+              Nouveau · Accompagnement
+            </p>
+            <h2 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">
+              Tu veux qu&apos;on te suive <span className="text-[var(--gold)]">personnellement</span> ?
+            </h2>
+            <p className="mt-4 max-w-xl text-lg text-white/75 leading-relaxed">
+              Le catalogue reste gratuit. Mais si tu es en Terminale et que tu veux une équipe
+              qui prépare ta liste d&apos;universités et te suit jusqu&apos;aux admissions, on est là.
+            </p>
+
+            <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  icon: ListChecks,
+                  title: "Ta liste, faite main",
+                  desc: "Universités et bourses choisies pour ton profil, ta série, tes moyens.",
+                },
+                {
+                  icon: MessageCircle,
+                  title: "Suivi sur WhatsApp",
+                  desc: "Des conseils et des relances là où tu es vraiment, pas dans une boîte mail.",
+                },
+                {
+                  icon: Users,
+                  title: "Ta promotion",
+                  desc: "Un groupe d'élèves qui visent la même chose que toi, animé par l'équipe.",
+                },
+              ].map(({ icon: Icon, title, desc }) => (
+                <li key={title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <Icon size={20} className="text-[var(--gold)]" />
+                  <h3 className="mt-3 font-semibold text-white">{title}</h3>
+                  <p className="mt-1 text-sm text-white/65 leading-relaxed">{desc}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="lg:col-span-2">
+            <div className="relative rounded-3xl border border-[var(--gold)]/30 bg-white p-8 text-[var(--foreground)] shadow-2xl">
+              <div className="absolute -top-3 left-8 rounded-full bg-[var(--gold)] px-3 py-1 text-xs font-bold text-[var(--primary)]">
+                Paiement unique
+              </div>
+              <p className="text-sm font-medium text-slate-500">Accompagnement personnalisé</p>
+              <p className="mt-2 flex items-baseline gap-2">
+                <span className="text-5xl font-bold text-[var(--primary)]">2 000</span>
+                <span className="text-lg font-semibold text-slate-600">FCFA</span>
+              </p>
+              <p className="mt-1 text-sm text-slate-500">Payable par Wave. Pas d&apos;abonnement.</p>
+
+              <ul className="mt-6 space-y-2 text-sm text-slate-700">
+                <li className="flex gap-2">
+                  <span className="text-[var(--gold)]">✓</span> Liste d&apos;universités et de bourses sur mesure
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[var(--gold)]">✓</span> Conseils personnalisés dans ton espace
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[var(--gold)]">✓</span> Groupe WhatsApp de ta promotion
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[var(--gold)]">✓</span> Suivi jusqu&apos;aux admissions
+                </li>
+              </ul>
+
+              <Button
+                asChild
+                size="lg"
+                className="mt-8 w-full rounded-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 font-semibold"
+              >
+                <Link href="/accompagnement#inscription">
+                  Je veux être accompagné(e)
+                  <ArrowRight size={16} />
+                </Link>
+              </Button>
+              <p className="mt-3 text-center text-xs text-slate-400">
+                Paiement vérifié à la main par l&apos;équipe Mibegnon.
+              </p>
+            </div>
           </div>
         </div>
       </section>

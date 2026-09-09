@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(auth)/actions";
-import { LayoutDashboard, Bookmark, ClipboardList, User, LogOut } from "lucide-react";
+import { LayoutDashboard, Bookmark, ClipboardList, User, LogOut, Compass } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { ARCHIVE_STAGES } from "@/lib/coaching/stages";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,22 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/connexion");
+
+  const coaching = await prisma.coachingLead.findUnique({
+    where: { userId: user.id },
+    select: { stage: true },
+  });
+  const showCoaching = Boolean(
+    coaching && !ARCHIVE_STAGES.includes(coaching.stage),
+  );
+
+  const links = showCoaching
+    ? [
+        sidebarLinks[0],
+        { href: "/dashboard/accompagnement", label: "Accompagnement", icon: Compass },
+        ...sidebarLinks.slice(1),
+      ]
+    : sidebarLinks;
 
   const name = user.user_metadata?.full_name ?? user.email ?? "Utilisateur";
   const initials = name
@@ -55,7 +73,7 @@ export default async function DashboardLayout({
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-56 border-r border-slate-200 bg-white px-3 py-6">
           <nav className="flex flex-col gap-1 flex-1">
-            {sidebarLinks.map(({ href, label, icon: Icon }) => (
+            {links.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
@@ -87,7 +105,7 @@ export default async function DashboardLayout({
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white flex items-center justify-around px-2 py-2 z-50">
-        {sidebarLinks.map(({ href, label, icon: Icon }) => (
+        {links.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}

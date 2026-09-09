@@ -20,6 +20,10 @@ export function buildContentSecurityPolicy(isProd: boolean): string {
     "https://vitals.vercel-insights.com",
     "https://challenges.cloudflare.com",
   ];
+  // Turbopack HMR + the error overlay fetch stack frames over ws in `next dev`.
+  if (!isProd) {
+    connectSrc.push("ws:", "wss:");
+  }
 
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
@@ -30,6 +34,7 @@ export function buildContentSecurityPolicy(isProd: boolean): string {
     "script-src": [
       "'self'",
       "'unsafe-inline'",
+      ...(isProd ? [] : ["'unsafe-eval'"]),
       "https://challenges.cloudflare.com",
     ],
     "style-src": ["'self'", "'unsafe-inline'"],

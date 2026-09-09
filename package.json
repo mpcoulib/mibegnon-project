@@ -21,6 +21,8 @@
     "chao:avatar": "tsx scripts/generate-chao-avatar.ts",
     "scholarships:expire": "tsx scripts/deactivate-expired.ts",
     "scholarships:expire:dry": "tsx scripts/deactivate-expired.ts --dry-run",
+    "coaching:purge": "tsx scripts/purge-coaching.ts",
+    "coaching:purge:dry": "tsx scripts/purge-coaching.ts --dry-run",
     "universities:extract": "tsx scripts/extract-universities-from-scholarships.ts",
     "universities:extract:dry": "tsx scripts/extract-universities-from-scholarships.ts --dry-run --limit 5",
     "universities:research": "tsx scripts/research-universities.ts",

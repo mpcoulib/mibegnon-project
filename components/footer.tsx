@@ -32,6 +32,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/accompagnement" className="hover:text-[var(--primary)] transition-colors">
+                  Accompagnement
+                </Link>
+              </li>
+              <li>
                 <Link href="/bourses?type=complete" className="hover:text-[var(--primary)] transition-colors">
                   Bourses complètes
                 </Link>

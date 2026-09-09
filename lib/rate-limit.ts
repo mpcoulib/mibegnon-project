@@ -79,3 +79,13 @@ export function rateLimitChaoAnonIp(ip: string) {
 export function rateLimitScholarshipSubmit(ip: string) {
   return runLimit("rl:submit:scholarship", ip, 10, "1 h");
 }
+
+/** Public coaching interest form. */
+export function rateLimitCoachingSubmit(ip: string) {
+  return runLimit("rl:coaching:submit", ip, 5, "1 h");
+}
+
+/** Wave receipt uploads. */
+export function rateLimitCoachingUpload(ip: string) {
+  return runLimit("rl:coaching:upload", ip, 8, "1 h");
+}

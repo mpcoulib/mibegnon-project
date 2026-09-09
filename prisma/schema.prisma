@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // pooler (6543) → app runtime
-  directUrl = env("DIRECT_URL")   // direct (5432) → migrations only
+  directUrl = env("DIRECT_URL") // direct (5432) → migrations only
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -40,6 +40,61 @@ enum DonationKind {
   MONTHLY
 }
 
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+// ─── Accompagnement (parcours payant) ────────────────────────────────────────
+
+enum Gender {
+  FEMININ
+  MASCULIN
+  NON_PRECISE
+}
+
+enum CoachingStage {
+  NOUVEAU // formulaire reçu
+  PAIEMENT_DEMANDE // instructions Wave envoyées
+  RECU_ENVOYE // capture Wave uploadée, à vérifier
+  PAYE // paiement confirmé par l'admin
+  COMPTE_INVITE // lien d'activation envoyé
+  ACTIF // compte créé, dans le groupe WhatsApp
+  TERMINE
+  REJETE
+  INJOIGNABLE
+}
+
+enum MessageChannel {
+  WHATSAPP
+  SMS
+  EMAIL
+}
+
+enum FileKind {
+  RECU
+  BULLETIN
+  RELEVE
+  LISTE_UNIVERSITES
+  AUTRE
+}
+
+enum Uploader {
+  ADMIN
+  STUDENT
+}
+
+enum NoteVisibility {
+  PRIVEE
+  PARTAGEE
+}
+
+enum ReceiptDecision {
+  EN_ATTENTE
+  CONFIRME
+  REFUSE
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -53,38 +108,41 @@ model User {
   gpa             Float?
   targetCountries String[]
   targetFields    String[]
+  role            UserRole        @default(STUDENT)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
   bookmarks    Bookmark[]
   applications Application[]
+  coachingLead CoachingLead?
 
   @@map("users")
 }
 
 model Scholarship {
-  id             String    @id @default(cuid())
-  name           String
-  provider       String
-  country        String
-  amount         Float?
-  currency       String    @default("USD")
-  isFullFunding  Boolean   @default(false)
-  deadline       DateTime?
-  academicLevels String[]  // e.g. ["BACHELOR", "MASTER"]
-  fields         String[]  // e.g. ["Informatique", "Médecine"]
-  description    String    @db.Text
-  requirements   String?   @db.Text
-  category       String?  @db.Text
+  id               String    @id @default(cuid())
+  name             String
+  provider         String
+  country          String
+  amount           Float?
+  currency         String    @default("USD")
+  isFullFunding    Boolean   @default(false)
+  deadline         DateTime?
+  academicLevels   String[] // e.g. ["BACHELOR", "MASTER"]
+  fields           String[] // e.g. ["Informatique", "Médecine"]
+  description      String    @db.Text
+  requirements     String?   @db.Text
+  category         String?   @db.Text
   link             String
   isActive         Boolean   @default(true)
   ivoirianEligible Boolean   @default(true)
   isTranslated     Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   bookmarks    Bookmark[]
   applications Application[]
+  curatedItems CuratedItem[]
 
   @@index([isActive, isTranslated])
   @@index([isActive, deadline])
@@ -112,21 +170,22 @@ model University {
 
   bookmarks    Bookmark[]
   applications Application[]
+  curatedItems CuratedItem[]
 
   @@index([isActive])
   @@map("universities")
 }
 
 model Bookmark {
-  id            String       @id @default(cuid())
+  id            String   @id @default(cuid())
   userId        String
   scholarshipId String?
   universityId  String?
-  createdAt     DateTime     @default(now())
+  createdAt     DateTime @default(now())
 
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scholarship Scholarship?  @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
-  university  University?   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship Scholarship? @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  university  University?  @relation(fields: [universityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, scholarshipId])
   @@unique([userId, universityId])
@@ -171,20 +230,18 @@ model SavedScholarship {
 }
 
 model Document {
-  id            String      @id @default(cuid())
+  id            String    @id @default(cuid())
   applicationId String
   name          String
-  isCompleted   Boolean     @default(false)
+  isCompleted   Boolean   @default(false)
   dueDate       DateTime?
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime  @default(now())
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([applicationId])
   @@map("documents")
 }
-
-
 
 model ScholarshipSubmission {
   id             String    @id @default(cuid())
@@ -248,4 +305,163 @@ model CronRun {
 
   @@index([job, createdAt])
   @@map("cron_runs")
+}
+
+// ─── Accompagnement (parcours payant) ────────────────────────────────────────
+// Server-only tables (Prisma). RLS enabled without policies → anon/authenticated denied.
+
+model CoachingLead {
+  id               String         @id @default(cuid())
+  fullName         String
+  phone            String // E.164, numéro WhatsApp élève (+225XXXXXXXXXX)
+  parentPhone      String? // E.164, WhatsApp parent (souvent le payeur)
+  email            String? // optionnel à l'intérêt ; requis à la création du compte
+  birthDate        DateTime       @db.Date
+  gender           Gender
+  city             String
+  educationLevel   EducationLevel
+  institution      String
+  serie            String? // A1, A2, C, D…
+  stage            CoachingStage  @default(NOUVEAU)
+  paymentReference String         @unique // ex. MBG-7F3K
+  amountFcfa       Int            @default(2000)
+  cohort           String? // ex. "Rentrée 2026" = nom du groupe WhatsApp
+  consentAt        DateTime
+  userId           String?        @unique
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user       User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  receipts   PaymentReceipt[]
+  messages   MessageLog[]
+  events     StageEvent[]
+  files      CoachingFile[]
+  notes      CoachingNote[]
+  curated    CuratedItem[]
+  activation ActivationToken?
+
+  @@index([stage, createdAt])
+  @@index([phone])
+  @@index([cohort])
+  @@map("coaching_leads")
+}
+
+model PaymentReceipt {
+  id           String          @id @default(cuid())
+  leadId       String
+  storagePath  String // bucket privé Supabase Storage
+  mimeType     String
+  sizeBytes    Int
+  amountSeen   Int?
+  waveTxId     String?
+  decision     ReceiptDecision @default(EN_ATTENTE)
+  decisionNote String?         @db.Text
+  decidedAt    DateTime?
+  decidedBy    String? // User.id admin
+  createdAt    DateTime        @default(now())
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([decision, createdAt])
+  @@map("payment_receipts")
+}
+
+model MessageLog {
+  id         String         @id @default(cuid())
+  leadId     String
+  channel    MessageChannel
+  templateId String?
+  body       String         @db.Text
+  toPhone    String? // destinataire E.164 (élève ou parent)
+  toRole     String? // student | parent
+  providerId String?
+  status     String         @default("queued") // queued | sent | logged | failed
+  error      String?        @db.Text
+  sentBy     String? // User.id admin, null si automatique
+  createdAt  DateTime       @default(now())
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@map("message_logs")
+}
+
+model StageEvent {
+  id        String         @id @default(cuid())
+  leadId    String
+  from      CoachingStage?
+  to        CoachingStage
+  byUserId  String? // null = système
+  note      String?        @db.Text
+  createdAt DateTime       @default(now())
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@map("stage_events")
+}
+
+model CoachingFile {
+  id          String   @id @default(cuid())
+  leadId      String
+  uploadedBy  Uploader
+  kind        FileKind @default(AUTRE)
+  label       String
+  storagePath String
+  mimeType    String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@map("coaching_files")
+}
+
+model CoachingNote {
+  id         String         @id @default(cuid())
+  leadId     String
+  visibility NoteVisibility @default(PRIVEE)
+  body       String         @db.Text
+  authorId   String? // User.id admin
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, visibility, createdAt])
+  @@map("coaching_notes")
+}
+
+model CuratedItem {
+  id            String   @id @default(cuid())
+  leadId        String
+  universityId  String?
+  scholarshipId String?
+  priority      Int      @default(0)
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  lead        CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  university  University?  @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  scholarship Scholarship? @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, universityId])
+  @@unique([leadId, scholarshipId])
+  @@index([leadId, priority])
+  @@map("curated_items")
+}
+
+model ActivationToken {
+  id        String    @id @default(cuid())
+  leadId    String    @unique
+  tokenHash String    @unique // sha256 du token envoyé par WhatsApp
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  lead CoachingLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("activation_tokens")
 }
